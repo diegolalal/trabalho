@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Cadastro de Contatos</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="style.css">    
+</head>
+
+<body onload="ListaContatos()">
+    <h2 class="text-align-center">Listagem de Contatos</h1>
+
+    <div class="container">
+        <div class="row">
+            <div id="msg" class="col-sm-10 offset-sm-1 ">
+                <!--<div class="alert alert-warning">Contato não encontrado.</div>-->
+            </div>
+        </div>
+
+        <div class="row">
+            <div id="msg" class="col-sm-2 offset-sm-10 ">
+                <a href="index.html"><input type="button" class="btn btn-warning" id="btnClear" value="Pagina inicial"></a>
+            </div>
+        </div>        
+        
+        <form id="form-contato">            
+            <div class="form-group row">
+                <div class="col-sm-8">
+                    <input type="text " placeholder="Informe a cidade do contato" name="filtro_cidade" id="filtro_cidade" onchange="ListaContatos()" class="form-control">
+                                       
+                </div>
+
+            </div>
+        </form>
+        
+
+
+        <div class="row">
+            <div class="col-sm-12">
+                <table id="grid-contatos" class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Nome</th>
+                            <th scope="col">Telefone</th>
+                            <th scope="col">E-mail</th>
+                            <th scope="col">Cidade</th>
+                            <th scope="col">Mensagem</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-contatos">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous">
+    </script>
+    <script src="app.js"></script>
+    <script>
+        // função para listar na tabela os contatos que estão associados aos filtros 
+        function ListaContatos() {
+            
+            // Obtem os dados informados pelo usuário nos filtros
+            let fc = document.getElementById('filtro_cidade').value;
+
+            // limpa a lista de contatos apresentados
+            $("#table-contatos").empty();
+
+            // Popula a tabela com os registros do banco de dados
+            for (let index = 0; index < db.data.length; index++) {
+                const contato = db.data[index];
+
+                // Verifica se os dados do contato batem com os filtros
+                if (((contato.cidade == fc) || (fc == '')) ) {
+                    
+                    // Inclui o contato na tabela    
+                    $("#table-contatos").append(`<tr><td scope="row">${contato.id}</td>
+                                                    <td>${contato.nome}</td>
+                                                    <td>${contato.telefone}</td>
+                                                    <td>${contato.email}</td>
+                                                    <td>${contato.cidade}</td>
+                                                    <td>${contato.categoria}</td>
+                                                </tr>`);
+                }
+            }
+            // Adiciona funções para tratar os eventos 
+           
+
+            // Intercepta o click do botão Excluir
+            $("#btnDelete").click(function () {
+                
+                    displayMessage("Selecione um contato a ser excluído.");
+                    return;
+                
+                deleteContato(parseInt(campoId));
+
+
+                // Limpa o formulario
+                $("#form-contato")[0].reset();
+            });
+
+            // Intercepta o click do botão Listar Contatos
+            $("#btnClear").click(function () {
+                $("#form-contato")[0].reset();
+            });
+
+            // Oculta a mensagem de aviso após alguns segundos
+            $('#msg').bind("DOMSubtreeModified", function () {
+                window.setTimeout(function () {
+                    $(".alert").fadeTo(500, 0).slideUp(500, function () {
+                        $(this).remove();
+                    });
+                }, 5000);
+            });
+
+            // Preenche o formulário quando o usuario clicar em uma linha da tabela 
+            $("#grid-contatos").on("click", "tr", function (e) {
+                let linhaContato = this;
+                colunas = linhaContato.querySelectorAll("td");
+
+                $("#inputId").val(colunas[0].innerText);
+                $("#inputNome").val(colunas[1].innerText);
+                $("#inputTelefone").val(colunas[2].innerText);
+                $("#inputEmail").val(colunas[3].innerText);
+                $("#inputCidade").val(colunas[4].innerText);
+                $("#inputCategoria").val(colunas[5].innerText);
+
+            });
+
+            exibeContatos();
+        }
+        function exibeContatos() {
+            // Remove todas as linhas do corpo da tabela
+            $("#table-contatos").html("");
+
+            // Popula a tabela com os registros do banco de dados
+            for (i = 0; i < db.data.length; i++) {
+                let contato = db.data[i];    
+                $("#table-contatos").append(`<tr><td scope="row">${contato.id}</td>
+                                                <td>${contato.nome}</td>
+                                                <td>${contato.telefone}</td>
+                                                <td>${contato.email}</td>
+                                                <td>${contato.cidade}</td>
+                                                <td class="mensagem-denuncia" data-toggle="tooltip" data-placement="top" title="${contato.categoria}">${contato.categoria}</td>
+                                                <td><button  class="btn btn-danger" onclick="deleteContato(${contato.id})" value="">Excluir</button></td>
+                                            </tr>`);
+            }
+
+            $(function () {
+                $('[data-toggle="tooltip"]').tooltip()
+            })
+        }
+        
+  
+    </script>
+    <script src="app.js"></script>
+
+</body>
+
+</html>
